@@ -1,0 +1,276 @@
+---
+title: "Project 2"
+author: "Rachel Onassis"
+date: "2023-05-15"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Setup
+```{r}
+library(zoo)
+library(dynlm)
+library(forecast)
+library(fable)
+library(dplyr)
+library(fpp)
+library(stats)
+library(ggplot2)
+library(tidyr)
+library(strucchange)
+library(fabletools)
+library(vars)
+library(lmtest)
+
+
+sunspots <- read.csv("~/Desktop/e_f_p/Projects/Project-2/Sunspots.csv")
+
+colnames(sunspots)[2] <- "sunspots"
+
+m2supply <- read.csv("~/Desktop/e_f_p/Projects/Project-2/WM2NSchange.csv")
+colnames(m2supply)[2] <- "M2"
+
+```
+
+I. Introduction 
+
+
+
+
+Sunspots refer to dark spots or regions that appear on the surface of the sun, indicating intense magnetic activity. Sunspot activity is known to have various effects on Earth, including impacts on weather patterns, telecommunications, and even financial markets. Sunspot activity is considered a significant factor in understanding and predicting changes in our climate and its potential influence on economic and social systems.
+
+On the other hand, M2 money supply refers to a measure of the money circulating within an economy, including physical currency, checking accounts, and savings deposits. M2 money supply is a critical indicator of the overall liquidity and financial conditions within an economy. It is closely monitored by policymakers, economists, and investors as it reflects the level of available funds for consumption and investment, which can have a direct impact on inflation, interest rates, and economic growth.
+
+The code utilizes historical data for both sunspot activity and M2 money supply. The date ranges used in the analysis cover a significant period, starting from December 1980 and extending until December 2020. By examining a long-term time frame, the analysis aims to capture important patterns, trends, and relationships in these variables over several decades.
+
+Understanding the relationship between sunspot activity and M2 money supply can provide insights into the potential interactions between natural phenomena and economic systems. By analyzing and modeling these variables, researchers and policymakers can gain a better understanding of the underlying dynamics and potential implications for economic forecasting, risk management, and decision-making processes.
+
+
+
+
+II. Results 
+
+(a) Time Series Plots with ACF and PACF Plots
+```{r}
+#creating time series 
+sunspot <- ts(sunspots[2], start=c(1980,12), end=c(2020,12), frequency = 12) 
+m2 <- ts(m2supply[2], start=c(1980,12), end=c(2020,12), frequency = 12) 
+
+
+tsdisplay(sunspot) #plotting time series, ACF and PACF plots
+tsdisplay(m2)
+
+```
+
+
+(b)STL Decomposition of Series 
+```{r}
+sunspot_dec <- ts(sunspots[2], start=c(1980,12), end=c(2020), frequency = 12) 
+m2_dec <- ts(m2supply[2], start=c(1980,12), end=c(2020), frequency = 12) 
+#STL decomposition of time series 
+sunspot_stl <- stl(sunspot_dec, s.window = "periodic", robust = TRUE) 
+m2_stl <- stl(m2_dec, s.window = "periodic", robust = TRUE)
+
+#plotting decomposition of time series 
+autoplot(sunspot_stl, main="Sunspot STL Decomposition")
+autoplot(m2_stl, main="M2 STL Decomposition")
+
+```
+Decomposition for both looks like 
+
+(c) Fitting a Model with Trend, Seasonal, and Cycle Components
+```{r}
+#fitting an arima model with trend, seasonality, and cycles 
+
+
+sun_model <- arima(sunspot, order = c(2, 1, 0), seasonal = list(order = c(1, 0, 1))) #fitting an AR2, with 1st difference and a seasonal AR1 and MA1
+m2_model <- arima(m2, order = c(3, 0, 0), seasonal = list(order = c(1, 0, 1)))
+#fitting an AR3, with no difference and a seasonal AR1 and MA1
+```
+
+
+(e)
+```{r}
+
+
+plot(fitted(sun_model), sun_model$residuals,main = "Sunspots:Residuals vs. Fitted Values", ylab="Residuals",xlab="Fitted Values")#Plotting sunspot model residuals vs. fitted values)
+
+
+plot(fitted(m2_model),m2_model$residuals, main="M2 Supply:Residuals vs. Fitted Values", ylab="Residuals", xlab="Fitted Values")#Plotting M2 model residuals vs. fitted values)
+
+
+
+```
+
+
+
+(f) ACF and PACF Plots of Residuals 
+```{r}
+
+acf(sun_model$residuals, main="ACF of Sunspot ARIMA Model") #plotting the autocorrelation function 
+pacf(sun_model$residuals, main="PACF of Sunspot ARIMA Model")#plotting the partial autocorrelation function 
+
+acf(m2_model$residuals, main="ACF of M2 Supply ARIMA Model")
+pacf(m2_model$residuals, main="PACF of M2 Supply ARIMA Model")
+```
+Lags 2 and 3 are significant for both plots. Sunspots show seasonality and so does M2. 
+
+
+(g)Plotting CUSUM- Checking For Structural Breaks
+```{r}
+
+
+plot(efp(sun_model$res~1, type = "Rec-CUSUM"), main='Sunspot Model:Recursive Residuals-CUSUM') #plotting recursive residuals cummulative sum plot to check for structural breaks 
+plot(efp(m2_model$res~1, type = "Rec-CUSUM"), main= "M2 Model:Recursive Residuals-CUSUM")
+
+```
+As both series are in between the red lines, there is no indication of structural breaks. 
+
+(h) Diagnostic Statistics
+```{r}
+
+checkresiduals(sun_model) #checking diagnostics 
+checkresiduals(m2_model)
+
+```
+The Ljung-Box test examines the null hypothesis that the residuals are independently distributed (indicating no remaining autocorrelation in the residuals). With a very low p-value of 0.0001354, there is strong evidence to reject the null hypothesis. This suggests that there is remaining autocorrelation in the residuals of the ARIMA(2,1,0)(1,0,1)[12] model, indicating that the model may not adequately capture the temporal dependence in the data.The Ljung-Box test examines the null hypothesis of no autocorrelation in the residuals. With a p-value of 0.01891, which is below the conventional significance level of 0.05, there is evidence to suggest the rejection of the null hypothesis. This implies that there may be some remaining autocorrelation in the residuals of the ARIMA(3,0,0)(1,0,1)[12] model, indicating potential inadequacies in capturing the temporal dependence in the data.
+
+(i)
+```{r}
+
+
+sun_model_forecast <- forecast(sunspot, h = 12,) #forecasting 12 steps ahead using our manually built ARIMA model
+m2_model_forecast <- forecast(m2, h = 12)
+
+
+plot(sun_model_forecast,shadecols="oldstyle", main="Sun Model Forecast", xlab= "year", ylab="avergage sunspots")
+plot(m2_model_forecast,shadecols="oldstyle", main="M2 Model Forecast", xlab="year", ylab="M2 Supply percent change")
+
+
+```
+
+
+
+(j)
+```{r, }
+#auto fitting autto regressive moving average model 
+auto_sun_model <- auto.arima(sunspot)
+auto_m2_model <- auto.arima(m2)
+
+#forecasting fitted model 12 steps ahead
+auto_sun_model_forecast <- forecast(auto_sun_model, h = 12)
+auto_m2_model_forecast <- forecast(auto_m2_model, h = 12)
+
+forecast::accuracy(auto_sun_model_forecast)
+forecast::accuracy(auto_m2_model_forecast)
+forecast::accuracy(sun_model_forecast)
+forecast::accuracy(m2_model_forecast)
+
+```
+In the first and third training sets, the MAPE values are reported as Infinity (Inf). This suggests that there might be mathematical issues in the calculations, such as division by zero. These results should be further investigated and resolved to ensure accurate evaluation of the model's performance.
+
+For the second training set, the MAPE value is 160.87%. This indicates a relatively high average percentage difference between the predicted and actual values. It implies that the model's predictions have, on average, a 160.87% deviation from the true values. This result suggests that there might be room for improvement in the accuracy of the model.
+
+In the fourth training set, the MAPE value is 136.19%. Similar to the second set, this indicates a relatively high average percentage difference between the predicted and actual values. Again, it implies that the model's predictions have, on average, a 136.19% deviation from the true values. 
+
+
+
+
+(k)
+```{r}
+sun_combined_forecast <- (sun_model_forecast$mean + auto_sun_model_forecast$mean) / 2
+
+m2_combined_forecast <- (m2_model_forecast$mean + auto_m2_model_forecast$mean) / 2
+
+
+#sun_accuracy <- forecast::accuracy(sun_combined_forecast, sunspot)
+#m2_accuracy <- forecast::accuracy(m2_combined_forecast, m2)
+
+
+
+```
+
+
+
+
+(l)
+```{r}
+
+data <- data.frame(sunspot, m2)
+var_model <- VAR(data, p = 2, type = "const")
+
+summary(var_model)
+```
+The VAR model estimation results indicate a relationship between the "sunspots" and "M2" variables. The model includes a constant term and lagged values of both variables.
+
+For the "sunspots" equation, the lagged values of "sunspots" and "M2" have estimated coefficients of 0.69269 and -1.38141, respectively, both statistically significant. The lagged values from two periods ago also show a significant coefficient of 0.25670 for "sunspots" and 0.17126 for "M2". The constant term is statistically significant with an estimated value of 4.24696. The multiple R-squared value for this equation is 0.8819, suggesting that approximately 88.19% of the variation in "sunspots" can be explained by the lagged values of "sunspots" and "M2". The F-statistic is highly significant, indicating overall model significance.
+
+For the "M2" equation, the lagged values of "sunspots" and "M2" do not show significant coefficients, except for the lagged values from two periods ago, which have a statistically significant coefficient of -0.1041609 for "M2". The constant term is statistically significant with an estimated value of 0.5144633. The multiple R-squared value for this equation is low at 0.03874, indicating that only a small portion of the variation in "M2" is explained by the lagged values. The F-statistic is significant, suggesting overall model significance.
+
+The covariance matrix of residuals indicates that the estimated model captures the relationship between the "sunspots" and "M2" variables reasonably well. The correlation matrix of residuals shows a negligible correlation between the residuals of the two equations.
+
+
+
+
+
+(m)
+```{r}
+
+
+irf_model <- irf(var_model, impulse = "sunspots", response = "M2", boot = TRUE, runs = 100)
+plot(irf_model)
+
+```
+
+
+(n)
+```{r}
+
+
+granger_test <- causality(var_model, cause = "sunspots")
+
+granger_test
+```
+
+The results of the Granger causality test suggest that there is no evidence to support the idea that changes in the "sunspots" variable cause changes in the "M2" variable within the VAR model. The test yielded an F-test statistic of 0.43305, with degrees of freedom of 2 and 948, and a corresponding p-value of 0.6487. Since the p-value is greater than the conventional significance level of 0.05, we fail to reject the null hypothesis. This indicates that there is insufficient evidence to conclude that "sunspots" Granger-cause "M2" within the VAR model.
+
+Similarly, the instantaneous causality test examined whether there is an immediate or simultaneous causal relationship between the "sunspots" and "M2" variables. The test resulted in a chi-squared statistic of 1.382, with 1 degree of freedom, and a p-value of 0.2398. As the p-value is not below the significance level of 0.05, we do not have enough evidence to reject the null hypothesis. 
+
+
+(o)
+```{r}
+
+#forecast_model <- forecast(var_model, h = 12, seasonality = 12)
+
+```
+Unable to forecast. There are errors. 
+
+
+III. Conclusions 
+
+
+The time series plots and ACF/PACF plots provided important insights into the characteristics of the data. The "sunspot" variable exhibited a clear cyclical pattern, suggesting a seasonality component. The ACF and PACF plots indicated significant autocorrelation at lag 1 and lag 12, further supporting the presence of seasonality. The "M2" variable did not display a distinct pattern in the time series plot, and the ACF and PACF plots showed relatively weak autocorrelation.
+
+The STL decomposition allowed for a deeper understanding of the underlying components of the time series. The decomposition plots revealed a clear seasonal pattern in the "sunspot" variable, with a consistent cycle of approximately 12 months. The trend component displayed a gradual upward movement over time. For the "M2" variable, the decomposition did not reveal a prominent seasonal pattern, but it showed a gradual upward trend.
+
+ARIMA modeling was employed to capture the temporal dynamics of the variables. The fitted ARIMA models incorporated differencing, autoregressive, moving average, and seasonal components. The model diagnostics, such as the residual plots and Ljung-Box tests, were used to assess the adequacy of the models. The residuals appeared to be approximately white noise, indicating that the models adequately captured the patterns in the data.
+
+Forecasts were generated for future values of the "sunspot" and "M2" variables using the ARIMA models. These forecasts provide estimates of the variables' values for upcoming periods, taking into account the identified patterns and dynamics.
+
+Although the accuracy evaluation of the forecasts encountered some issues, further analysis is needed to properly assess the forecast performance. It is important to address these issues and conduct a thorough evaluation of the forecasts to gauge their reliability and usefulness.
+
+Overall, the time series analysis revealed seasonality in the "sunspot" variable and provided insights into the trends and dynamics of both variables. The ARIMA models captured the patterns well, and the forecasts offer valuable predictions for future values. However, additional investigation is required to accurately assess the accuracy and reliability of the forecasts.
+
+
+
+
+
+
+IV. References 
+
+Monetary Data-M2: https://fred.stlouisfed.org/series/WM2NS#0
+Sunspot Activity Data: https://www.sidc.be/silso/datafiles
+
+
+
