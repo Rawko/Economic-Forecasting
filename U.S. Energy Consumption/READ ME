@@ -1,1 +1,62 @@
+# US Energy Consumption Analysis and Forecasting
+
+This repository is dedicated to the analysis and forecasting of US energy consumption, spanning from 1950 to present, with a focus on data from 1973 onwards.
+
+## Project Description
+
+This project, encompasses a comprehensive analysis of the total primary energy consumption in the United States. The analysis includes data processing, trend modeling, seasonal adjustment, autocorrelation examination, and forecasting.
+
+The dataset is sourced from the U.S. Energy Information Administration (EIA) and captures the consumption of various energy sources, from fossil fuels to renewables.
+
+## Repository Contents
+
+- `README.md`: This descriptive file.
+- `data`: Folder containing the raw `TotalPrimaryEnergy.csv` dataset and any processed data files.
+- `scripts`: R scripts and markdown files containing the analysis code.
+- `output`: Generated reports and forecast figures in PDF format.
+
+## Data Analysis Workflow
+
+1. **Data Preprocessing**: The raw data is first imported and processed for analysis. Key variables like `energy_c` representing energy consumption are selected for the study.
+2. **Time Series Analysis**: Using various R libraries, a time series object is created and analyzed. The time variable `t` is created for proper modeling.
+3. **Modeling Energy Consumption**: Both linear and non-linear (exponential) models are fitted to the historical data to identify underlying trends.
+4. **Residuals Analysis**: After fitting the models, residuals are analyzed to evaluate model fit.
+5. **Forecasting**: Using the linear model, a 21-step ahead forecast is generated with accompanying confidence intervals.
+6. **Seasonal and Trend Adjustments**: The data is adjusted for seasonality and trend using additive and multiplicative methods, followed by ACF and PACF analysis.
+7. **Statistical Analysis**: A thorough examination of the model statistics, including AIC and BIC, is conducted to compare model fits.
+
+## R Libraries Used
+
+- `forecast`
+- `tseries`
+- `dplyr`
+- `feasts`
+- `fable`
+- `tsibble`
+- `lattice`
+- `tis`
+- `MASS`
+- `fpp3`
+- `fpp`
+- `seasonal`
+- `stats`
+- `graphics`
+- `PerformanceAnalytics`
+- `dynlm`
+- `ggplot2`
+- `ggseas`
+
+## Running the Analysis
+
+To replicate this analysis, clone the repository, install the required R packages, and run the scripts in the order specified within the `scripts` folder.
+
+## Conclusions
+
+The linear model has been identified as statistically superior in fitting the historical energy consumption data. However, forecasts derived from this model display wide confidence intervals, suggesting significant potential for model refinement by incorporating cyclical patterns and checking for dynamic structures in error components.
+
+The exploration of stochastic properties post-adjustment indicates that the major systematic components of the time series have been captured, leaving behind what appears to be white noise. Further improvements might include dynamic modeling approaches and volatility clustering considerations to enhance prediction accuracy and reliability.
+
+## Contact
+
+For questions, comments, or contributions, please open an issue in this repository or contact the author directly.
 
