@@ -16,3 +16,35 @@ This interdisciplinary approach enables researchers, economists, policymakers, p
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/yourusername/economic-forecasting.git
+
+2. Install Dependencies
+Ensure Python 3.x is installed.
+Install required Python packages
+pip install -r requirements.txt
+
+3. Running a Forecast
+Navigate to the project directory.
+Run the main script with the desired parameters, specifying the subject area (economics, physics, or genetics):
+python main.py --model <model_name> --forecast_period <period> --subject <subject_area>
+
+
+
+
+
+Contributing
+We welcome contributions to this project! If you have suggestions for improvements or new features, especially those that further the interdisciplinary nature of this tool, please follow these steps:
+
+Fork the repository.
+Create a new branch for your feature (git checkout -b feature/AmazingFeature).
+Commit your changes (git commit -m 'Add some AmazingFeature').
+Push to the branch (git push origin feature/AmazingFeature).
+Open a Pull Request.
+License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+Acknowledgments
+This project makes use of data from various public data sources across economics, physics, and genetics.
+Thanks to all the contributors who have helped shape this interdisciplinary repository.
+Contact
+For any inquiries or further discussions, especially regarding the interdisciplinary applications of these tools, please contact 
+Rachel Onassis at rachelonassis@gmail.com
