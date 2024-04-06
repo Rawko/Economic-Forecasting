@@ -1,1 +1,33 @@
 
+# Economic Recession Forecasting Project
+
+## Overview
+This project is dedicated to forecasting economic recessions by analyzing GDP percentage points through the use of SARIMA and Hidden Markov Chain Model (HMM). 
+The goal is to accurately predict downturns in the U.S. economy on a quarterly basis.
+
+## Dataset
+The dataset `gdp_recession_II.csv` is central to our analysis. It consists of quarterly observations, detailing the percentage points indicative of recession likelihood.
+
+## Repository Contents
+- `recession_forecasting.py`: Python script for data processing and model implementation.
+- `gdp_recession_II.csv`: Dataset containing the economic indicators.
+- 'Economic_Recession_Forecasting.ipynb' : jupyter notebook 
+- 'Economic_Recession_Forecasting.html'
+- 'Economic_Recession_Forecasting.md' : markdown
+- 'Economic_Recession_Forecasting.pdf' : pdf 
+
+## Setup
+Clone the repository and install dependencies to get started:
+
+git clone https://github.com/rawko/economic-recession-forecasting.git
+cd economic-recession-forecasting
+
+
+
+## Contributing
+Contributions are welcome. Please fork the repo, create a feature branch, commit your changes, and create a pull request.
+
+## License
+Distributed under the MIT License. See `LICENSE` for more information.
+
+
